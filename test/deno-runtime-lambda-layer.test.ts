@@ -1,0 +1,15 @@
+// import * as cdk from 'aws-cdk-lib';
+// import { Template } from 'aws-cdk-lib/assertions';
+// import * as DenoRuntimeLambdaLayer from '../lib/deno-runtime-lambda-layer-stack';
+
+// example test. To run these tests, uncomment this file along with the
+// example resource in lib/deno-runtime-lambda-layer-stack.ts
+test('SQS Queue Created', () => {
+//   const app = new cdk.App();
+//   const stack = new DenoRuntimeLambdaLayer.DenoRuntimeLambdaLayerStack(app, 'MyTestStack');
+//   const template = Template.fromStack(stack);
+
+//   template.hasResourceProperties('AWS::SQS::Queue', {
+//     VisibilityTimeout: 300
+//   });
+});
