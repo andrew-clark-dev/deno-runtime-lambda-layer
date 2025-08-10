@@ -1,14 +1,17 @@
 {
   "name": "deno-runtime-lambda-layer",
   "version": "0.1.0",
+  "private": true,
   "bin": {
-    "deno-runtime-lambda-layer": "bin/deno-runtime-lambda-layer.js"
+    "deno-layer": "bin/deno-layer.ts"
   },
   "scripts": {
-    "build": "tsc",
+    "build": "tsc -p tsconfig.json",
     "watch": "tsc -w",
-    "test": "jest",
-    "cdk": "cdk"
+    "cdk": "cdk",
+    "deploy": "npm run build && cdk deploy",
+    "synth": "npm run build && cdk synth",
+    "bootstrap": "cdk bootstrap"
   },
   "devDependencies": {
     "@types/jest": "^29.5.14",

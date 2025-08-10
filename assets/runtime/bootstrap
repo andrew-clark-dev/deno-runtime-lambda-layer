@@ -1,0 +1,12 @@
+#!/bin/sh
+set -euo pipefail
+
+# Cache Deno in /tmp to speed warm invokes (functions that use this layer)
+export DENO_DIR=/tmp/.deno
+
+# Start the shim (Runtime API loop)
+exec /opt/bin/deno run \
+  --allow-env \
+  --allow-read=/var/task,/opt/runtime \
+  --allow-net \
+  /opt/runtime/shim.ts
