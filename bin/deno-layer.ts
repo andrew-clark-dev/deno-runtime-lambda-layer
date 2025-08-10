@@ -1,7 +1,8 @@
 #!/usr/bin/env node
+import process from "node:process";
 import * as cdk from "aws-cdk-lib";
-import { DenoLayerStack } from "../lib/deno-layer-stack";
-import { DenoExampleFnStack } from "../lib/deno-example-stack";
+import { createDenoLayerStack } from "../lib/deno-layer-stack";
+import { createDenoExampleFnStack } from "../lib/deno-example-stack";
 
 const app = new cdk.App();
 const env = {
@@ -15,26 +16,21 @@ const archStr = (app.node.tryGetContext("architecture") ?? "arm64") as
   | "x86_64";
 const denoVersion = app.node.tryGetContext("denoVersion") ?? "v1.45.5";
 
-// Deploy the layer stack (always)
-const layerStack = new DenoLayerStack(app, "DenoRuntimeLayerStack", {
+// Deploy the layer stack
+const { stack: layerStack, layer } = createDenoLayerStack(app, "DenoRuntimeLayerStack", {
   env,
   archStr,
   denoVersion,
 });
 
-// Optionally deploy the example Lambda stack:
-// - use `-c layerArn=...` to point at an existing layer
-// - otherwise it will wire to the layer from the stack above
-const createExample = app.node.tryGetContext("createExample") === "true" ||
-  app.node.tryGetContext("createExample") === true;
+// Deploy the example Lambda stack
+const exampleStack = createDenoExampleFnStack(app, "DenoExampleFnStack", {
+  env,
+  archStr,
+  layerArn: app.node.tryGetContext("layerArn") || undefined,
+  layerFromStack: app.node.tryGetContext("layerArn") ? undefined : layer,
+});
 
-if (createExample) {
-  new DenoExampleFnStack(app, "DenoExampleFnStack", {
-    env,
-    archStr,
-    // prefer explicit ARN if provided
-    layerArn: app.node.tryGetContext("layerArn") || undefined,
-    // otherwise pass the layer from the first stack
-    layerFromStack: layerStack.layer,
-  });
+if (!app.node.tryGetContext("layerArn")) {
+  exampleStack.addDependency(layerStack);
 }

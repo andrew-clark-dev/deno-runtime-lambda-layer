@@ -73,7 +73,9 @@ The layer content itself is assembled during **synth/deploy** via a Docker bundl
 
 ---
 
-## Deploy the **layer only**
+## Deploy
+
+### Deploy layer only
 
 ```bash
 # ARM64 (recommended for price/perf)
@@ -83,11 +85,29 @@ npx cdk deploy DenoRuntimeLayerStack -c architecture=arm64 -c denoVersion=v1.45.
 npx cdk deploy DenoRuntimeLayerStack -c architecture=x86_64 -c denoVersion=v1.45.5
 ```
 
+### Deploy both layer and example function
+
+```bash
+# Deploy both stacks
+npx cdk deploy --all -c architecture=arm64 -c denoVersion=v1.45.5
+
+# Or specify stacks explicitly
+npx cdk deploy DenoRuntimeLayerStack DenoExampleFnStack -c architecture=arm64
+```
+
+### Deploy example function with existing layer
+
+```bash
+npx cdk deploy DenoExampleFnStack -c layerArn=arn:aws:lambda:REGION:ACCOUNT:layer:deno-runtime:VERSION -c architecture=arm64
+```
+
 **Outputs:**
 
 - `LayerArn` – the ARN to attach to functions
 - `LayerArch` – the architecture you built
 - `DenoVersion` – the Deno version included
+- `TestFunctionName` – example function name (if deployed)
+- `TestFunctionUrl` – public function URL for quick testing (if deployed)
 
 ---
 
@@ -122,25 +142,7 @@ zip -r function.zip mod.ts
 
 ---
 
-## (Optional) Deploy the example Lambda stack
-
-Deploy both stacks (the example references the layer via a cross-stack ref):
-
-```bash
-# Using the freshly deployed layer from DenoRuntimeLayerStack
-npx cdk deploy DenoRuntimeLayerStack DenoExampleFnStack -c createExample=true -c architecture=arm64
-```
-
-Or point the example stack at an **existing** layer ARN:
-
-```bash
-npx cdk deploy DenoExampleFnStack   -c createExample=true   -c layerArn=arn:aws:lambda:REGION:ACCOUNT:layer:deno-runtime:VERSION   -c architecture=arm64
-```
-
-**Outputs:**
-
-- `TestFunctionName`
-- `TestFunctionUrl` (public function URL for quick testing)
+## Test the example function
 
 Test with curl:
 
