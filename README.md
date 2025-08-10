@@ -88,11 +88,21 @@ npx cdk deploy DenoRuntimeLayerStack -c architecture=x86_64 -c denoVersion=v1.45
 ### Deploy both layer and example function
 
 ```bash
-# Deploy both stacks
+# Deploy all stacks (uses optimized layer by default)
 npx cdk deploy --all -c architecture=arm64 -c denoVersion=v1.45.5
+
+# Deploy with standard layer
+npx cdk deploy --all -c architecture=arm64 -c useOptimized=false
 
 # Or specify stacks explicitly
 npx cdk deploy DenoRuntimeLayerStack DenoExampleFnStack -c architecture=arm64
+```
+
+### Deploy optimized layer only
+
+```bash
+# Optimized layer for faster cold starts
+npx cdk deploy DenoOptimizedRuntimeLayerStack -c architecture=arm64 -c denoVersion=v1.45.5
 ```
 
 ### Deploy example function with existing layer

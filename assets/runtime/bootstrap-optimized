@@ -1,0 +1,24 @@
+#!/bin/bash
+# Optimized bootstrap for faster cold starts
+
+set -euo pipefail
+
+# Set optimized environment variables
+export DENO_DIR="/opt/.deno"
+export DENO_NO_UPDATE_CHECK=1
+export DENO_NO_PROMPT=1
+export DENO_UNSTABLE_SLOPPY_IMPORTS=1
+
+# Use pre-compiled shim if available, fallback to regular shim
+if [ -f "/opt/runtime/shim-compiled" ]; then
+    exec /opt/runtime/shim-compiled
+else
+    exec /opt/bin/deno run \
+        --no-check \
+        --no-lock \
+        --cached-only \
+        --allow-net \
+        --allow-read \
+        --allow-env \
+        /opt/runtime/shim.ts
+fi

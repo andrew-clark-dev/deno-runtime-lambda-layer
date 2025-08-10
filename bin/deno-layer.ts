@@ -2,6 +2,7 @@
 import process from "node:process";
 import * as cdk from "aws-cdk-lib";
 import { createDenoLayerStack } from "../lib/deno-layer-stack";
+import { createDenoOptimizedLayerStack } from "../lib/deno-optimized-layer-stack";
 import { createDenoExampleFnStack } from "../lib/deno-example-stack";
 
 const app = new cdk.App();
@@ -16,21 +17,32 @@ const archStr = (app.node.tryGetContext("architecture") ?? "arm64") as
   | "x86_64";
 const denoVersion = app.node.tryGetContext("denoVersion") ?? "v1.45.5";
 
-// Deploy the layer stack
+// Deploy the standard layer stack
 const { stack: layerStack, layer } = createDenoLayerStack(app, "DenoRuntimeLayerStack", {
   env,
   archStr,
   denoVersion,
 });
 
-// Deploy the example Lambda stack
+// Deploy the optimized layer stack
+const { stack: optimizedLayerStack, layer: optimizedLayer } = createDenoOptimizedLayerStack(app, "DenoOptimizedRuntimeLayerStack", {
+  env,
+  archStr,
+  denoVersion,
+});
+
+// Deploy the example Lambda stack (using optimized layer by default)
+const useOptimized = app.node.tryGetContext("useOptimized") !== "false";
+const selectedLayer = useOptimized ? optimizedLayer : layer;
+const selectedLayerStack = useOptimized ? optimizedLayerStack : layerStack;
+
 const exampleStack = createDenoExampleFnStack(app, "DenoExampleFnStack", {
   env,
   archStr,
   layerArn: app.node.tryGetContext("layerArn") || undefined,
-  layerFromStack: app.node.tryGetContext("layerArn") ? undefined : layer,
+  layerFromStack: app.node.tryGetContext("layerArn") ? undefined : selectedLayer,
 });
 
 if (!app.node.tryGetContext("layerArn")) {
-  exampleStack.addDependency(layerStack);
+  exampleStack.addDependency(selectedLayerStack);
 }
